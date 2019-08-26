@@ -17,8 +17,6 @@ class MainForm(tk.Frame):
     self.canvas_width = width
     self.canvas_height = height
     self.initWidgets()
-    self.pre_x = self.pre_y = None
-    self.points = []
     self.ctrl_p_radius = 10
     self.is_pick_ctrl_p = False
     self.pick_ctrl_p_index = -1
@@ -103,13 +101,17 @@ class MainForm(tk.Frame):
 
 
   def startSimulation(self):
+    ctrl_ps = self.simulator.spline.control_points
+    #制御点の数が2個未満のとき(曲線が生成されていないとき)は何もしない
+    if len(ctrl_ps) < 2:
+        return
+
     self.start_btn.config(state="disable")
     self.is_simu_running = True
-    ctrl_ps = self.simulator.spline.control_points
     start_point = ctrl_ps[0]
     norm = self.simulator.spline.getDifferentialValue(0)
     norm = norm[0]**2 + norm[1]**2
-    E = 0.01
+    E = 0.01 #わずかに画面外に出れるようなエネルギーを与える
     U = -9.80665 * start_point[1]
     V = np.sqrt(2*(E-U)/norm)
     domain_of_def = [0, len(ctrl_ps) - 1]
@@ -149,7 +151,7 @@ class MainForm(tk.Frame):
       else:
         print("処理落ち")
       self.elapsed_time_label["text"] = "{:.3f}".format(elapsed_time)
-      if s== domain_of_def[1]:
+      if s == domain_of_def[1]:
         break
 
     self.start_btn.config(state="normal")
@@ -204,7 +206,6 @@ class MainForm(tk.Frame):
     self.clear_ctrlps_btn = tk.Button(self, text="曲線クリア", bd=2, width=20, command=self.clearCtrlPs)
     self.clear_ctrlps_btn.grid(column=1, row=7)
 
-    #self.canvas.create_rectangle(0, 0, self.window_width, self.window_height)
     self.canvas.bind("<ButtonPress-1>", self.onLeftClick)
     self.canvas.bind("<ButtonPress-3>", self.onRightClick)
     self.canvas.bind("<ButtonRelease-1>", self.onRelease)

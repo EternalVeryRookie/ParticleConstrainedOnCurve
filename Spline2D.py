@@ -230,15 +230,6 @@ class Spline2D:
     return [self.__curve_x[index].get_2_order_differential_value(t), self.__curve_y[index].get_2_order_differential_value(t)]
 
 
-
-
   @property
   def control_points(self):
     return deepcopy(self.__control_points)
-
-if __name__ == "__main__":
-  curve = Spline2D()
-  curve.addControlPoint([1,2])
-  curve.addControlPoint([1,2])
-  curve.addControlPoint([1,2])
-  curve.addControlPoint([1,2])
