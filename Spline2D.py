@@ -243,15 +243,17 @@ class Spline2D:
     min_dist = sys.float_info.max
     min_dist_point = None
     min_dist_param = None
+    min_dist_curve_index = None
 
-    for cubic in zip(self.__curve_x, self.__curve_y):
+    for index, cubic in enumerate(zip(self.__curve_x, self.__curve_y)):
       dist, point, param = calcDistPointToCubic(point, cubic)
       if min_dist > dist:
         min_dist = dist
         min_dist_point = point
         min_dist_param = param
+        min_dist_curve_index = index
 
-    return min_dist, min_dist_point, min_dist_param
+    return min_dist, min_dist_point, min_dist_param, min_dist_curve_index
 
   @property
   def control_points(self):

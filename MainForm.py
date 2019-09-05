@@ -72,6 +72,7 @@ class MainForm(tk.Frame):
   def insertControlPoint(self, point):
     if len(self.simulator.spline.control_points) - 1 >= self.max_ctrl_p_num:
       return
+
     point_copy = copy(point)
     point_copy[0] /= self.canvas_width
     point_copy[1] /= self.canvas_height
@@ -98,7 +99,10 @@ class MainForm(tk.Frame):
     if self.pick_ctrl_p_index >= 0:
       return
 
-    self.insertControlPoint([evt.x, evt.y])
+    if self.is_mouse_on_curve:
+      pass
+    else :
+      self.insertControlPoint([evt.x, evt.y])
 
   def onRightClick(self, evt):
     if self.is_simu_running:
@@ -169,8 +173,9 @@ class MainForm(tk.Frame):
       if s == domain_of_def[1]:
         break
 
-    self.start_btn.config(state="normal")
     self.is_simu_running = False
+    self.start_btn.config(state="normal")
+
 
   def stopSimulation(self):
     self.is_simu_running = False
