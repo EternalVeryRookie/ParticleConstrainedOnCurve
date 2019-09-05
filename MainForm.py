@@ -184,7 +184,10 @@ class MainForm(tk.Frame):
     if evt.x < 0 or evt.y < 0 or evt.x > self.window_width or evt.y > self.window_height:
       return
 
-    self.simulator.spline.moveControlPoint([evt.x/self.canvas_width,evt.y/self.canvas_height], self.pick_ctrl_p_index)
+    point = [evt.x/self.canvas_width,evt.y/self.canvas_height]
+    self.simulator.spline.moveControlPoint(point, self.pick_ctrl_p_index)
+    d, p, param = self.simulator.spline.calcDistPointToCubic(point)
+    print(d)
     self.draw_canvas()
 
   def leave(self, evt):

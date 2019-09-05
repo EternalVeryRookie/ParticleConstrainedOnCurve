@@ -1,6 +1,9 @@
+import sys
 import numpy as np
 import math
 from copy import copy, deepcopy
+
+from CalcDistPointToCubic import calcDistPointToCubic
 
 class CubicFunction :
   def __init__(self, a, b, c, d, lower, upper):
@@ -41,6 +44,7 @@ class CubicFunction :
 
 #制御点間の媒介変数の幅は1
 #制御点がN個あれば媒介変数の定義域は0<=t<=N-1
+#リストにCubicFunctionを順次追加していく
 class Spline2D:
   def __init__(self):
     self.__control_points = []
@@ -229,6 +233,25 @@ class Spline2D:
 
     return [self.__curve_x[index].get_2_order_differential_value(t), self.__curve_y[index].get_2_order_differential_value(t)]
 
+
+
+
+  #splineの制御点が1個以下のときの返値はfloat_max
+  #splineを構成する各3次関数との距離を計算する
+  #各3次関数との距離が最も小さい点の座標とインデックスとパラメーターと距離を返す
+  def calcDistPointToSpline(self, point):
+    min_dist = sys.float_info.max
+    min_dist_point = None
+    min_dist_param = None
+
+    for cubic in zip(self.__curve_x, self.__curve_y):
+      dist, point, param = calcDistPointToCubic(point, cubic)
+      if min_dist > dist:
+        min_dist = dist
+        min_dist_point = point
+        min_dist_param = param
+
+    return min_dist, min_dist_point, min_dist_param
 
   @property
   def control_points(self):
