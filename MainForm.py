@@ -7,6 +7,8 @@ from copy import copy
 
 from RestraintedEOM import MassPointRestraintedCurveSimulator
 
+#canvas空間とシミュレーション空間を分けて考える
+#canvas空間をそのままシミュレーションに利用すると扱う数値が大きくて誤差が大きくなるため
 class MainForm(tk.Frame):
   def __init__(self, master=None, width=500, height=500):
     super().__init__(master)
@@ -22,6 +24,8 @@ class MainForm(tk.Frame):
     self.pick_ctrl_p_index = -1
     self.is_simu_running = False
     self.max_ctrl_p_num = 10
+    self.is_mouse_on_curve = False
+    self.dist_mouse_to_curve_th = 0.01#シミュレーション空間上での距離
     self.simulator = MassPointRestraintedCurveSimulator()
     self.addControlPoint([self.canvas_width - self.ctrl_p_radius, self.canvas_height - self.ctrl_p_radius])
 
@@ -37,8 +41,13 @@ class MainForm(tk.Frame):
 
   def draw_curve(self):
     points = self.simulator.spline.sampling(10)
+    if self.is_mouse_on_curve:
+      color = "green"
+    else:
+      color = "black"
+
     for i in range(len(points)-1):
-      self.canvas.create_line(points[i][0]*self.canvas_width, points[i][1]*self.canvas_height, points[i+1][0]*self.canvas_width, points[i+1][1]*self.canvas_height, tag="line")
+      self.canvas.create_line(points[i][0]*self.canvas_width, points[i][1]*self.canvas_height, points[i+1][0]*self.canvas_width, points[i+1][1]*self.canvas_height, tag="line", fill=color)
 
   def draw_ctrl_p(self):
     ctrl_ps = self.simulator.spline.control_points
@@ -70,18 +79,24 @@ class MainForm(tk.Frame):
     self.draw_canvas()
 
 
+  def pickCtrl(self, point_on_canvas):
+    control_points = self.simulator.spline.control_points
+    for index in range(len(control_points)-1): #最後の制御点は移動させない
+      point = control_points[index]
+      dx = point_on_canvas[0] - self.canvas_width*point[0]
+      dy = point_on_canvas[1] - self.canvas_height*point[1]
+      if (dx**2 + dy**2)< self.ctrl_p_radius**2:
+        return index
+
+    return -1
+
   def onLeftClick(self, evt):
     if self.is_simu_running:
       return
 
-    control_points = self.simulator.spline.control_points
-    for index in range(len(control_points)-1): #最後の制御点は移動させない
-      point = control_points[index]
-      dx = evt.x - self.canvas_width*point[0]
-      dy = evt.y - self.canvas_height*point[1]
-      if (dx**2 + dy**2)< self.ctrl_p_radius**2:
-        self.pick_ctrl_p_index = index
-        return
+    self.pick_ctrl_p_index = self.pickCtrl([evt.x, evt.y])
+    if self.pick_ctrl_p_index >= 0:
+      return
 
     self.insertControlPoint([evt.x, evt.y])
 
