@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import math
 from copy import copy, deepcopy
+import time
 
 from CalcDistPointToCubic import calcDistPointToCubic
 
@@ -246,10 +247,10 @@ class Spline2D:
     min_dist_curve_index = None
 
     for index, cubic in enumerate(zip(self.__curve_x, self.__curve_y)):
-      dist, point, param = calcDistPointToCubic(point, cubic)
+      dist, p, param = calcDistPointToCubic(point, cubic)
       if min_dist > dist:
         min_dist = dist
-        min_dist_point = point
+        min_dist_point = p
         min_dist_param = param
         min_dist_curve_index = index
 

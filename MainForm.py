@@ -25,6 +25,7 @@ class MainForm(tk.Frame):
     self.is_simu_running = False
     self.max_ctrl_p_num = 10
     self.is_mouse_on_curve = False
+    self.select_curve_index = -1
     self.dist_mouse_to_curve_th = 0.01#シミュレーション空間上での距離
     self.simulator = MassPointRestraintedCurveSimulator()
     self.addControlPoint([self.canvas_width - self.ctrl_p_radius, self.canvas_height - self.ctrl_p_radius])
@@ -47,7 +48,7 @@ class MainForm(tk.Frame):
       color = "black"
 
     for i in range(len(points)-1):
-      self.canvas.create_line(points[i][0]*self.canvas_width, points[i][1]*self.canvas_height, points[i+1][0]*self.canvas_width, points[i+1][1]*self.canvas_height, tag="line", fill=color)
+      self.canvas.create_line(points[i][0]*self.canvas_width, points[i][1]*self.canvas_height, points[i+1][0]*self.canvas_width, points[i+1][1]*self.canvas_height, tag="line", fill=color, width=5)
 
   def draw_ctrl_p(self):
     ctrl_ps = self.simulator.spline.control_points
@@ -69,14 +70,14 @@ class MainForm(tk.Frame):
     self.draw_canvas()
 
   #先頭に挿入する
-  def insertControlPoint(self, point):
+  def insertControlPoint(self, point, index):
     if len(self.simulator.spline.control_points) - 1 >= self.max_ctrl_p_num:
       return
 
     point_copy = copy(point)
     point_copy[0] /= self.canvas_width
     point_copy[1] /= self.canvas_height
-    self.simulator.spline.insertControlPoint(point_copy, 0)
+    self.simulator.spline.insertControlPoint(point_copy, index)
     self.draw_canvas()
 
 
@@ -100,9 +101,9 @@ class MainForm(tk.Frame):
       return
 
     if self.is_mouse_on_curve:
-      pass
+      self.insertControlPoint([evt.x, evt.y], self.select_curve_index)
     else :
-      self.insertControlPoint([evt.x, evt.y])
+      self.insertControlPoint([evt.x, evt.y], 0)
 
   def onRightClick(self, evt):
     if self.is_simu_running:
@@ -201,17 +202,37 @@ class MainForm(tk.Frame):
     if self.pick_ctrl_p_index < 0:
       return
 
-    if evt.x < 0 or evt.y < 0 or evt.x > self.window_width or evt.y > self.window_height:
+    if evt.x < 0 or evt.y < 0 or evt.x > self.canvas_width or evt.y > self.canvas_height:
       return
 
-    point = [evt.x/self.canvas_width,evt.y/self.canvas_height]
+    point = [evt.x/self.canvas_width, evt.y/self.canvas_height]
     self.simulator.spline.moveControlPoint(point, self.pick_ctrl_p_index)
-    d, p, param = self.simulator.spline.calcDistPointToCubic(point)
-    print(d)
+
     self.draw_canvas()
+
 
   def leave(self, evt):
     self.pick_ctrl_p_index = -1
+
+
+  def mouseMove(self, evt):
+    action = (lambda: 0)
+    point = [evt.x/self.canvas_width, evt.y/self.canvas_height]
+    d, point, param, min_dist_curve_index = self.simulator.spline.calcDistPointToSpline(point)
+    th = 0.00001
+    print(min_dist_curve_index)
+    if d < th:
+      if not(self.is_mouse_on_curve):
+        action = self.draw_canvas
+      self.is_mouse_on_curve = True
+      self.select_curve_index = min_dist_curve_index + 1
+    else:
+      if self.is_mouse_on_curve:
+        action = self.draw_curve
+      self.is_mouse_on_curve = False
+
+    action()
+
 
   def initWidgets(self):
     self.canvas = tk.Canvas(self, width=self.canvas_width, height=self.canvas_height, bd=2, bg="white")
@@ -233,6 +254,7 @@ class MainForm(tk.Frame):
     self.canvas.bind("<ButtonPress-3>", self.onRightClick)
     self.canvas.bind("<ButtonRelease-1>", self.onRelease)
     self.canvas.bind("<B1-Motion>", self.onDragg)
+    self.canvas.bind("<Motion>", self.mouseMove)
     self.canvas.bind("<Leave>", self.leave)
 
 

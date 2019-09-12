@@ -22,3 +22,9 @@ d_y = Symbol("d_y")
 
 print( expand( (X - (a_x + b_x*(t-l_x) + c_x*((t-l_x)**2) + d_x*((t-l_x)**3) ) )**2 + (Y - (a_y + b_y*(t-l_y) + c_y*((t-l_y)**2) + d_y*((t-l_y)**3)) )**2 ) )
 print( diff  ( (X - (a_x + b_x*(t-l_x) + c_x*((t-l_x)**2) + d_x*((t-l_x)**3) ) )**2 + (Y - (a_y + b_y*(t-l_y) + c_y*((t-l_y)**2) + d_y*((t-l_y)**3)) )**2, t) )
+print("\n\n")
+
+dist = (X - (a_x + b_x*(t-l_x) + c_x*((t-l_x)**2) + d_x*((t-l_x)**3) ) )**2 + (Y - (a_y + b_y*(t-l_y) + c_y*((t-l_y)**2) + d_y*((t-l_y)**3)) )**2
+diff = (-2*b_x - 2*c_x*(-2*l_x + 2*t) - 6*d_x*(-l_x + t)**2)*(X - a_x - b_x*(-l_x + t) - c_x*(-l_x + t)**2 - d_x*(-l_x + t)**3) + (-2*b_y - 2*c_y*(-2*l_y + 2*t) - 6*d_y*(-l_y + t)**2)*(Y - a_y - b_y*(-l_y + t) - c_y*(-l_y + t)**2 - d_y*(-l_y + t)**3)
+a = Poly(expand(diff), t)
+print(a.coeffs())
