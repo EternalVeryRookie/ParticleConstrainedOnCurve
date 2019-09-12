@@ -220,7 +220,7 @@ class MainForm(tk.Frame):
     point = [evt.x/self.canvas_width, evt.y/self.canvas_height]
     d, point, param, min_dist_curve_index = self.simulator.spline.calcDistPointToSpline(point)
     th = 0.00001
-    print(min_dist_curve_index)
+
     if d < th:
       if not(self.is_mouse_on_curve):
         action = self.draw_canvas
