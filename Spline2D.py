@@ -5,6 +5,7 @@ from copy import copy, deepcopy
 
 from CalcDistPointToCubic import calcDistPointToCubic
 
+
 class CubicFunction :
   def __init__(self, a, b, c, d, lower, upper):
     self.a = a
@@ -13,6 +14,7 @@ class CubicFunction :
     self.d = d
     self.domain_lower = lower
     self.domain_upper = upper
+
 
   def get_value(self, t):
     """
@@ -23,6 +25,7 @@ class CubicFunction :
     variable = t - self.domain_lower
     return self.a + self.b * variable + self.c * pow(variable, 2) + self.d * pow(variable, 3)
 
+
   def get_differential_value(self, t):
     """
     if t < self.domain_lower or t > self.domain_upper:
@@ -31,6 +34,7 @@ class CubicFunction :
 
     variable = t - self.domain_lower
     return self.b + 2*self.c*variable + 3*self.d*variable*variable
+
 
   def get_2_order_differential_value(self, t):
     """
@@ -51,6 +55,7 @@ class Spline2D:
     self.__curve_x = []
     self.__curve_y = []
 
+
   def addControlPoint(self, point):
     self.__control_points.append(copy(point))
     if len(self.__control_points) == 1:
@@ -60,6 +65,7 @@ class Spline2D:
     self.__curve_x.append(CubicFunction(0, 0, 0, 0, lower, upper))
     self.__curve_y.append(CubicFunction(0, 0, 0, 0, lower, upper))
     self.__calcSplineCoefficient()
+
 
   def insertControlPoint(self, point, index):
     if len(self.__control_points) == 0 or index < 0 or len(self.__control_points) <= index:
@@ -71,6 +77,7 @@ class Spline2D:
     self.__curve_x.append(CubicFunction(0, 0, 0, 0, lower, upper))
     self.__curve_y.append(CubicFunction(0, 0, 0, 0, lower, upper))
     self.__calcSplineCoefficient()
+
 
   def removeControlPoint(self, index):
     if len(self.__control_points) <= 0 or len(self.__control_points) <= index:
@@ -86,6 +93,7 @@ class Spline2D:
 
     self.__calcSplineCoefficient()
 
+
   def moveControlPoint(self, coordinate, index):
     if len(self.__control_points) <= 0 or len(self.__control_points) <= index:
       return
@@ -93,6 +101,7 @@ class Spline2D:
     self.__control_points[index][0] = coordinate[0]
     self.__control_points[index][1] = coordinate[1]
     self.__calcSplineCoefficient()
+
 
   def __calcSplineCoefficient(self):
     if len(self.__control_points) < 2:
@@ -111,10 +120,8 @@ class Spline2D:
         curves_xy[dim][curveI].d = solve[4 * curveI + 3]
 
 
-
   def __calcLeftSideMatrix(self):
     mat = np.zeros(( 4*len(self.__curve_x), 4*len(self.__curve_x) ))
-
 
     domainWidth = 1.0 #この実装では各3次曲線の定義域の幅は常に1
     for curveI in range(len(self.__curve_x)-1):
@@ -126,7 +133,6 @@ class Spline2D:
       for i in range(4):
       	mat[4 * curveI + 1][4 * curveI + i] = pow(domainWidth, i)
 
-
       mat[4 * curveI + 2][4 * curveI + 1] =  1.0
       mat[4 * curveI + 2][4 * curveI + 2] =  2.0 * (domainWidth)
       mat[4 * curveI + 2][4 * curveI + 3] =  3.0 * pow(domainWidth, 2)
@@ -136,7 +142,6 @@ class Spline2D:
       mat[4 * curveI + 3][4 * curveI + 2] = 2.0
       mat[4 * curveI + 3][4 * curveI + 3] = 6.0 * domainWidth
       mat[4 * curveI + 3][4 * curveI + 6] = -2.0
-
 
     curveN = len(self.__curve_x)-1
     #c_0 = 0
@@ -178,6 +183,7 @@ class Spline2D:
 
     return v_xy
 
+
   def sampling(self, num_onesection):
     if len(self.__control_points) < 2:
       return []
@@ -194,6 +200,7 @@ class Spline2D:
     points[len(points)-1] = [x, y]
     return points
 
+
   def getValue(self, t):
     if len(self.__curve_x) == 0:
       return [None, None]
@@ -206,6 +213,7 @@ class Spline2D:
       index = math.floor(t)
 
     return [self.__curve_x[index].get_value(t), self.__curve_y[index].get_value(t)]
+
 
   def getDifferentialValue(self, t):
     if len(self.__curve_x) == 0:
@@ -220,6 +228,7 @@ class Spline2D:
 
     return [self.__curve_x[index].get_differential_value(t), self.__curve_y[index].get_differential_value(t)]
 
+
   def get2OrderDifferentialValue(self, t):
     if len(self.__curve_x) == 0:
       return [None, None]
@@ -232,8 +241,6 @@ class Spline2D:
       index = math.floor(t)
 
     return [self.__curve_x[index].get_2_order_differential_value(t), self.__curve_y[index].get_2_order_differential_value(t)]
-
-
 
 
   #splineの制御点が1個以下のときの返値はfloat_max
@@ -254,6 +261,7 @@ class Spline2D:
         min_dist_curve_index = index
 
     return min_dist, min_dist_point, min_dist_param, min_dist_curve_index
+
 
   @property
   def control_points(self):

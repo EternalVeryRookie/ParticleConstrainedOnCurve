@@ -7,6 +7,7 @@ from copy import copy
 
 from RestraintedEOM import MassPointRestraintedCurveSimulator
 
+
 #canvas空間とシミュレーション空間を分けて考える
 #canvas空間をそのままシミュレーションに利用すると扱う数値が大きくて誤差が大きくなるため
 class MainForm(tk.Frame):
@@ -32,12 +33,14 @@ class MainForm(tk.Frame):
     size = str(self.window_width)+"x"+str(self.window_height)
     self.master.geometry(size)
 
+
   def draw_canvas(self):
     self.canvas.delete("line")
     self.canvas.delete("ctrl_p")
     self.canvas.delete("mass_point")
     self.draw_curve()
     self.draw_ctrl_p()
+
 
   def draw_curve(self):
     points = self.simulator.spline.sampling(10)
@@ -49,6 +52,7 @@ class MainForm(tk.Frame):
     for i in range(len(points)-1):
       self.canvas.create_line(points[i][0]*self.canvas_width, points[i][1]*self.canvas_height, points[i+1][0]*self.canvas_width, points[i+1][1]*self.canvas_height, tag="line", fill=color)
 
+
   def draw_ctrl_p(self):
     ctrl_ps = self.simulator.spline.control_points
     color = "red"
@@ -57,6 +61,7 @@ class MainForm(tk.Frame):
       p[1] *= self.canvas_height
       self.canvas.create_oval(p[0]-self.ctrl_p_radius, p[1]-self.ctrl_p_radius, p[0]+self.ctrl_p_radius, p[1]+self.ctrl_p_radius, fill=color, tag="ctrl_p")
       color = "blue"
+
 
   def addControlPoint(self, point):
     if len(self.simulator.spline.control_points) - 1 >= self.max_ctrl_p_num:
@@ -67,6 +72,7 @@ class MainForm(tk.Frame):
     point_copy[1] /= self.canvas_height
     self.simulator.spline.addControlPoint(point_copy)
     self.draw_canvas()
+
 
   #先頭に挿入する
   def insertControlPoint(self, point):
@@ -91,6 +97,7 @@ class MainForm(tk.Frame):
 
     return -1
 
+
   def onLeftClick(self, evt):
     if self.is_simu_running:
       return
@@ -103,6 +110,7 @@ class MainForm(tk.Frame):
       pass
     else :
       self.insertControlPoint([evt.x, evt.y])
+
 
   def onRightClick(self, evt):
     if self.is_simu_running:
@@ -210,8 +218,10 @@ class MainForm(tk.Frame):
     print(d)
     self.draw_canvas()
 
+
   def leave(self, evt):
     self.pick_ctrl_p_index = -1
+
 
   def initWidgets(self):
     self.canvas = tk.Canvas(self, width=self.canvas_width, height=self.canvas_height, bd=2, bg="white")
